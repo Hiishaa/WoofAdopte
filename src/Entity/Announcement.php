@@ -10,43 +10,55 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: AnnouncementRepository::class)]
 #[ApiResource(
+    normalizationContext: ['groups' => ['read']],
+    denormalizationContext: ['groups' => ['write']],
     operations: [
-        new GetCollection(),
         new Get(),
-    ]
+        new GetCollection(normalizationContext: ['groups' => ['read:collection', 'read:Announcement']]),
+    ],
 )]
+
 class Announcement
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["read", "read:collection"])]
     protected ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["read", "read:collection"])]
     protected ?string $title = null;
 
     #[ORM\Column]
+    #[Groups(["read", "read:collection"])]
     protected ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(["read", "read:collection"])]
     protected ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'announcements')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["read", "read:collection"])]
     protected ?Announcer $announcer = null;
 
     #[ORM\OneToMany(mappedBy: 'announcement', targetEntity: Dog::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[Assert\Count(min: 0)]
+    #[Groups(["read", "read:collection"])]
     protected Collection $dogs;
 
     #[ORM\OneToMany(mappedBy: 'announcement', targetEntity: Request::class)]
+    #[Groups(["read", "read:collection"])]
     protected Collection $requests;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(["read", "read:collection"])]
     protected ?string $generalInformation = null;
 
     public function __construct()

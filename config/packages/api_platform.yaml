@@ -1,0 +1,15 @@
+api_platform:
+    # show_webby: false
+    mapping:
+        paths: ["%kernel.project_dir%/src/Entity"]
+    patch_formats:
+        json: ["application/merge-patch+json"]
+    swagger:
+        versions: [3]
+        api_keys:
+            JWT:
+                name: Authorization
+                type: header
+    title: "API WoofAdopte"
+    description: "De beaux chiens à adopter !"
+    version: "0.0.1"

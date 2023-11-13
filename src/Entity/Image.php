@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\GetCollection;
 use App\Repository\ImageRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ImageRepository::class)]
 #[Vich\Uploadable]
@@ -25,6 +26,7 @@ class Image
     protected ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["read", "read:Announcement"])]
     protected ?string $path = null;
 
     #[ORM\Column(nullable: true)]

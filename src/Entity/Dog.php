@@ -3,52 +3,71 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\DogRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: DogRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(),
+        new GetCollection(),
+    ],
+)]
 class Dog
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["read", "read:Announcement"])]
     protected ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["read", "read:Announcement"])]
     protected ?string $name = null;
 
     #[ORM\Column]
+    #[Groups(["read", "read:Announcement"])]
     protected ?bool $isLof = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(["read", "read:Announcement"])]
     protected ?string $background = null;
 
     #[ORM\Column]
+    #[Groups(["read", "read:Announcement"])]
     protected ?bool $isPetFriendly = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(["read", "read:Announcement"])]
     protected ?string $description = null;
 
     #[ORM\Column]
+    #[Groups(["read", "read:Announcement"])]
     protected ?bool $isAdopted = false;
 
     #[ORM\ManyToOne(inversedBy: 'dogs')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["read", "read:Announcement"])]
     protected ?Announcement $announcement = null;
 
     #[ORM\OneToMany(mappedBy: 'dog', targetEntity: Image::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[Assert\Count(min: 0)]
+    #[Groups(["read", "read:Announcement"])]
     protected Collection $images;
 
     #[ORM\ManyToMany(targetEntity: Race::class, inversedBy: 'dogs')]
+    #[Groups(["read", "read:Announcement"])]
     protected Collection $races;
 
     #[ORM\ManyToMany(targetEntity: Request::class, mappedBy: 'dogs')]
+    #[Groups(["read", "read:Announcement"])]
     protected Collection $requests;
 
     public function __construct()

@@ -2,21 +2,41 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\Email;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 
+#[ApiResource(
+    normalizationContext: ['groups' => ['read']], // Du back au front
+    denormalizationContext: ['groups' => ['create', 'create:user']], // Du front au back
+    operations: [
+        new Get(),
+        new Post(validationContext: ['groups' => ['Default', 'create:user']]),
+        new Delete(),
+        new Patch(),
+        // operations: [
+        //     new Post(),
+    ]
+)]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ORM\InheritanceType('JOINED')]
 #[ORM\DiscriminatorColumn(name: 'discr', type: 'string')]
 #[ORM\DiscriminatorMap(['adopter' => Adopter::class, 'admin' => Admin::class, 'announcer' => Announcer::class])]
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -26,21 +46,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\Email]
     #[Assert\NotBlank]
+    #[Groups(["create", "create:user"])]
     protected ?string $email = null;
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Groups(["create", "create:user"])]
     protected ?string $password = null;
 
     #[Assert\Length(min: 8)]
     protected ?string $plainPassword = null;
 
     #[ORM\Column(length: 50, nullable: true)]
+    #[Groups(["create", "create:user"])]
     protected ?string $firstName = null;
 
     #[ORM\Column(length: 100, nullable: true)]
+    #[Groups(["create", "create:user"])]
     protected ?string $lastName = null;
 
     #[ORM\Column(length: 150, nullable: true)]
@@ -170,5 +194,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->department = $department;
 
         return $this;
+    }
+    public static function createFromPayload($email, array $payload)
+    {
+        $user = new User();
+        $user->setEmail($email);
+        dd($email, $payload);
+        return $user;
     }
 }
